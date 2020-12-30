@@ -51,8 +51,7 @@ export class TransactionBuilder {
     private web3Provider: Web3,
     private dexConf: Adapters,
     private tokens: Token[],
-  ) {
-  }
+  ) {}
 
   multiSwapSteps = (priceRoute: OptimalRatesWithPartnerFees) => {
     return priceRoute.multiRoute && priceRoute.multiRoute.length || 1;
@@ -177,17 +176,42 @@ export class TransactionBuilder {
 
       case 'balancer':
         const { swaps } = data;
-
         return web3Coder.encodeParameter(
           {
-            ParentStruct: {
-              'swaps[]': {
-                pool: 'address',
-                tokenInParam: 'uint',
-                tokenOutParam: 'uint',
-                maxPrice: 'uint',
+            name: 'ParentStruct',
+            type: 'tuple',
+            components: [
+              {
+                name: 'swaps',
+                type: 'tuple[][]',
+                components: [
+                  {
+                    name: 'pool',
+                    type: 'address',
+                  },
+                  {
+                    name: 'tokenIn',
+                    type: 'address',
+                  },
+                  {
+                    name: 'tokenOut',
+                    type: 'address',
+                  },
+                  {
+                    name: 'swapAmount',
+                    type: 'uint',
+                  },
+                  {
+                    name: 'limitReturnAmount',
+                    type: 'uint',
+                  },
+                  {
+                    name: 'maxPrice',
+                    type: 'uint',
+                  },
+                ],
               },
-            },
+            ],
           },
           { swaps },
         );
@@ -525,8 +549,8 @@ export class TransactionBuilder {
       targetExchange,
       fromAmount: this.applySlippageForBuy(exchangeName)
         ? new BigNumber(route.srcAmount)
-          .times(slippageFactor)
-          .toFixed(0, BigNumber.ROUND_DOWN)
+            .times(slippageFactor)
+            .toFixed(0, BigNumber.ROUND_DOWN)
         : route.srcAmount,
       toAmount: route.destAmount,
       payload,
@@ -705,14 +729,14 @@ export class TransactionBuilder {
       const gas = ignoreGas
         ? {}
         : {
-          gas: await this.estimateGas(
-            swapMethodData,
-            userAddress,
-            value,
-            gasPrice,
-            this.multiSwapSteps(priceRoute),
-          ),
-        };
+            gas: await this.estimateGas(
+              swapMethodData,
+              userAddress,
+              value,
+              gasPrice,
+              this.multiSwapSteps(priceRoute)
+            ),
+          };
 
       return {
         from: userAddress,
@@ -747,14 +771,14 @@ export class TransactionBuilder {
       const gas = ignoreGas
         ? {}
         : {
-          gas: await this.estimateGas(
-            swapMethodData,
-            userAddress,
-            value,
-            gasPrice,
-            this.multiSwapSteps(priceRoute),
-          ),
-        };
+            gas: await this.estimateGas(
+              swapMethodData,
+              userAddress,
+              value,
+              gasPrice,
+              this.multiSwapSteps(priceRoute),
+            ),
+          };
 
       return {
         from: userAddress,
